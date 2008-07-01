@@ -1,0 +1,45 @@
+<?php
+
+// $Id$
+
+/**
+ * @file
+ * The Session API module provides a quick interface for storing
+ * information in the session.
+ */
+
+/**
+ * Determine if cookies are enabled.
+ */
+function session_api_available() {
+  return !empty($_COOKIE);
+}
+
+/**
+ * Return a Session API ID corresponding to the current session. The Session
+ * API ID is the mapping of the private php session_id [1] to the ID used my
+ * modules leveraging the Session API.
+ *
+ * 1. http://php.net/manual/en/function.session-id.php
+ */
+function session_api_get_sid() {
+  if (!session_api_available()) {
+    return FALSE;
+  }
+
+  if (!is_numeric($_SESSION['session_api_id'])) {
+    // first, check if id exists in db
+    $sid = db_result(db_query("SELECT sid FROM {session_api} WHERE session_id = '%s'", session_id()));
+    
+    if (!$sid) {
+      // no sid exists, create new one
+      $rec = new stdClass();
+      $rec->session_id = session_id();
+      drupal_write_record('session_api', $rec);
+      $sid = $rec->sid;
+    }
+      
+    $_SESSION['session_api_id'] = $sid;
+  }
+  return $_SESSION['session_api_id'];
+}
