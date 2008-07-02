@@ -43,3 +43,61 @@ function session_api_get_sid() {
   }
   return $_SESSION['session_api_id'];
 }
+
+/**
+ * Implementation of hook_menu().
+ */
+function session_api_menu() {
+  $items['admin/settings/session-api'] = array(
+    'title' => t('Session API Configuration'),
+    'description' => t('Configure Session API behavior'),
+    'access arguments' => array('administer site settings'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('session_api_settings_form'),
+    'file' => 'session_api.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_cron().
+ */
+function session_api_cron() {
+  module_invoke_all('session_api_cleanup', 'run');
+}
+
+/**
+ * Implementation of hook_session_api_cleanup().
+ *
+ * A self implementation of the Session API cleanup hook. Generally called
+ * from session_api_cron().
+ *
+ * @param string $op
+ *   The operation the function perform.
+ *    * run  - perform the cleanup
+ *    * info - provide information(in the form of a keyed array) of the title
+ *             and description of the cleanup.
+ * @return
+ *   Varies with $op.
+ *   * run - NULL
+ *   * info - a keyed array containing title and description
+ */
+function session_api_session_api_cleanup($op = 'run') {
+  switch ($op) {
+    case 'info':
+      return array(
+        'title' => t('Clear expired Session API sessions'),
+        'description' => t('Clear out old Session API IDs for which the corresponding <a href="!php">PHP session</a> no longer exists.', array('!php' => url('http://php.net/manual/en/book.session.php'))),
+      );
+
+    case 'run':
+    default:
+      // fetch list of outdated sids
+      $result = db_query("SELECT sap.sid FROM {session_api} sap LEFT JOIN {sessions} s ON (sap.session_id = s.sid) WHERE s.sid IS NULL");
+      while ($session = db_fetch_object($result)) {
+       // remove the session api id
+        db_query("DELETE FROM {session_api} WHERE sid = %d", $session->sid);
+      }
+  }
+}
