@@ -51,7 +51,7 @@ function session_api_menu() {
   $items['admin/settings/session-api'] = array(
     'title' => t('Session API Configuration'),
     'description' => t('Configure Session API behavior'),
-    'access arguments' => array('administer site settings'),
+    'access arguments' => array('administer site configuration'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('session_api_settings_form'),
     'file' => 'session_api.admin.inc',
