@@ -4,11 +4,11 @@
 
 /**
  * @file
- * Session API SimpleTests.
+ * Session API tests.
  */
 
 /**
- * Session API SimpleTest class
+ * Session API test class.
  */
 class SessionApiTestCase extends DrupalWebTestCase {
   /**
@@ -26,11 +26,29 @@ class SessionApiTestCase extends DrupalWebTestCase {
    * Implement setUp().
    */
   function setUp() {
-    parent::setUp('session_api');
+    parent::setUp('session_api', 'session_api_test');
   }
 
   /**
-   * Verify functions.
+   * Reset the cookie file so that it refers to the specified user.
+   *
+   * @param $uid User id to set as the active session.
+   */
+  function sessionReset($uid = 0) {
+    // Close the internal browser.
+    $this->curlClose();
+    $this->loggedInUser = FALSE;
+
+    // Change cookie file for user.
+    $this->cookieFile = file_directory_path('temporary') . '/cookie.' . $uid . '.txt';
+    $this->additionalCurlOptions[CURLOPT_COOKIEFILE] = $this->cookieFile;
+    $this->additionalCurlOptions[CURLOPT_COOKIESESSION] = TRUE;
+    $this->drupalGet('session-api-test');
+    $this->assertResponse(200, t('Session API test module is correctly enabled.'), t('Session API'));
+  }
+
+  /**
+   * Verify functions work properly.
    */
   function testFunctions() {
     module_load_include('module', 'session_api');
@@ -54,20 +72,16 @@ class SessionApiTestCase extends DrupalWebTestCase {
     $_SESSION['session_api_id'] = $fake_sid;
     $this->assertTrue(session_api_get_sid() == $fake_sid, t('Function session_api_get_sid() returns expected value.'));
 
-    // Store ID in the db.
-    session_id(md5(rand(1, 20000)));
-    $rec = new stdClass();
-    $rec->session_id = session_id();
-    drupal_write_record('session_api', $rec);
-    $_SESSION['session_api_id'] = NULL;
-    $this->assertTrue(session_api_get_sid() == $rec->sid, 'Function session_api_get_sid() correctly retrieves the session_api_id from the database.');
+    // Initialize sessions.
+    $this->sessionReset();
+    $this->drupalGet('session-api-test');
+    $sid = $this->drupalGetHeader('X-Session-Api-Sid');
+    $session_id = $this->drupalGetHeader('X-Session-Api-Session-Id');
+    $this->assertTrue(!empty($session_id), t('Session API test module properly initialized session api.'));
+    $stored = db_query("SELECT session_id FROM {session_api} WHERE sid = :sid", array(':sid' => $sid))->fetchField();
+    $this->assertEqual($stored, $session_id, t('session_api_get_sid() is properly storing the session_id.'));
 
-    // Restore pre-testing values.
-    $_COOKIE = $old_cookie;
-    if (isset($old_session_api_id)) {
-      $_SESSION['session_api_id'] = $old_session_api_id;
-    }
-    db_query("DELETE FROM {session_api} WHERE session_id = '%s'", session_id());
+    // Restore user's value.
     session_id($old_sid);
   }
 }

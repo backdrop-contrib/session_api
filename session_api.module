@@ -16,6 +16,14 @@ function session_api_available() {
 }
 
 /**
+ * Initialize sessions for anonymous users.
+ */
+function session_api_start_session() {
+  $_SESSION['session_api'] = TRUE;
+  drupal_session_start();
+}
+
+/**
  * Return a Session API ID corresponding to the current session. The Session
  * API ID is the mapping of the private php session_id [1] to the ID used by
  * modules leveraging the Session API.
@@ -27,14 +35,14 @@ function session_api_get_sid() {
     return FALSE;
   }
 
-  if (!is_numeric($_SESSION['session_api_id'])) {
+  if (!isset($_SESSION['session_api_id'])) {
     $sid = FALSE;
 
     // First, check if the session ID has changed by pulling down the
     // Session API cookie.
     if (isset($_COOKIE['session_api_session']) && $_COOKIE['session_api_session'] != session_id()) {
       // Check if this sid exists.
-      $sid = db_result(db_query("SELECT sid FROM {session_api} WHERE session_id = '%s'", array(':session_id' => $_COOKIE['session_api_session'])));
+      $sid = db_query("SELECT sid FROM {session_api} WHERE session_id = '%s'", array(':session_id' => $_COOKIE['session_api_session']))->fetchField();
     }
 
     if ($sid) {
@@ -47,12 +55,12 @@ function session_api_get_sid() {
     }
     else {
       // Secondly, check if id exists in db.
-      $sid = db_result(db_query("SELECT sid FROM {session_api} WHERE session_id = '%s'", array(':session_id' => session_id())));
+      $sid = db_query("SELECT sid FROM {session_api} WHERE session_id = '%s'", array(':session_id' => session_id()))->fetchField();
     }
     
     if (!$sid) {
       // No sid exists, create new one.
-      $rec = new stdClass();
+      $rec = new stdClass;
       $rec->session_id = session_id();
       drupal_write_record('session_api', $rec);
       $sid = $rec->sid;
@@ -89,7 +97,7 @@ function session_api_cron() {
   // Fetch list of outdated sids.
   $result = db_query("SELECT sap.sid FROM {session_api} sap LEFT JOIN {sessions} s ON (sap.session_id = s.sid) WHERE s.sid IS NULL");
   $outdated_sids = array();
-  while ($session = db_fetch_object($result)) {
+  foreach ($result as $session) {
     $outdated_sids[] = $session->sid;
   }
   if (!empty($outdated_sids)) {
