@@ -31,6 +31,9 @@ function session_api_start_session() {
  * 1. http://php.net/manual/en/function.session-id.php
  */
 function session_api_get_sid() {
+  // Must initialize sessions for anonymous users.
+  session_api_start_session();
+
   if (!session_api_available()) {
     return FALSE;
   }

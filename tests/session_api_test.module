@@ -25,9 +25,6 @@ function session_api_test_menu() {
  * Implementation of hook_init().
  */
 function session_api_test_init() {
-  // Must initialize sessions for anonymous users.
-  session_api_start_session();
-
   $sid = session_api_get_sid();
   header('X-Session-Api-Sid: ' . $sid);
   header('X-Session-Api-Session-Id: ' . session_id());
