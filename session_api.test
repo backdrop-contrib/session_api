@@ -40,7 +40,7 @@ class SessionApiTestCase extends DrupalWebTestCase {
     $this->loggedInUser = FALSE;
 
     // Change cookie file for user.
-    $this->cookieFile = file_directory_path('temporary') . '/cookie.' . $uid . '.txt';
+    $this->cookieFile = drupal_realpath('public://cookie.' . $uid . '.txt');
     $this->additionalCurlOptions[CURLOPT_COOKIEFILE] = $this->cookieFile;
     $this->additionalCurlOptions[CURLOPT_COOKIESESSION] = TRUE;
     $this->drupalGet('session-api-test');
@@ -54,10 +54,6 @@ class SessionApiTestCase extends DrupalWebTestCase {
     module_load_include('module', 'session_api');
     // Capture existing values, which are restored at the end of this function.
     $old_cookie = $_COOKIE;
-    if (isset($_SESSION['session_api_id'])) {
-      $old_session_api_id = $_SESSION['session_api_id'];
-    }
-    $old_sid = session_id();
 
     // session_api_available();
     $_COOKIE = NULL;
@@ -67,10 +63,17 @@ class SessionApiTestCase extends DrupalWebTestCase {
     // Enable cookies.
     $_COOKIE = $old_cookie;
 
-    // Find correct sid.
-    $fake_sid = rand(1, 2000000);
-    $_SESSION['session_api_id'] = $fake_sid;
-    $this->assertTrue(session_api_get_sid() == $fake_sid, t('Function session_api_get_sid() returns expected value.'));
+    // Check that the session_api_get_sid doesn't create a sid when the
+    // caller don't want it to get created.
+    unset($_COOKIE['session_api_session']);
+    $this->assertEqual(session_api_get_sid(FALSE), -1, t("The session_api_get_sid returns a negative value when the caller don't want to create a new session if it doesn't exist"));
+
+    // Store ID in the db.
+    $rec = new stdClass();
+    $rec->session_id = md5(ip_address() . time() . drupal_get_private_key());
+    drupal_write_record('session_api', $rec);
+    $_COOKIE['session_api_session'] = $rec->session_id;
+    $this->assertEqual(session_api_get_sid(), $rec->sid, 'Function session_api_get_sid() correctly retrieves the session_api_id from the database.');
 
     // Initialize sessions.
     $this->sessionReset();
@@ -80,8 +83,5 @@ class SessionApiTestCase extends DrupalWebTestCase {
     $this->assertTrue(!empty($session_id), t('Session API test module properly initialized session api.'));
     $stored = db_query("SELECT session_id FROM {session_api} WHERE sid = :sid", array(':sid' => $sid))->fetchField();
     $this->assertEqual($stored, $session_id, t('session_api_get_sid() is properly storing the session_id.'));
-
-    // Restore user's value.
-    session_id($old_sid);
   }
 }

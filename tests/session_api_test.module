@@ -27,7 +27,9 @@ function session_api_test_menu() {
 function session_api_test_init() {
   $sid = session_api_get_sid();
   header('X-Session-Api-Sid: ' . $sid);
-  header('X-Session-Api-Session-Id: ' . session_id());
+
+  $session_id = db_query("SELECT session_id FROM {session_api} WHERE sid = :sid", array(':sid' => $sid))->fetchField();
+  header('X-Session-Api-Session-Id: ' . $session_id);
 }
 
 /**
