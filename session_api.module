@@ -61,8 +61,8 @@ function session_api_get_sid($create = TRUE) {
        $session_id = md5(ip_address() . time() . drupal_get_private_key());
     }
 
-    // Need to respect $cookie_domain.
-    global $cookie_domain;
+    // For the cookie we use the same domain that Drupal's own session cookie uses.
+    $cookie_domain = ini_get('session.cookie_domain');
     // Update the session timeout.
     if ($sid) {
       $rec = new stdClass;
