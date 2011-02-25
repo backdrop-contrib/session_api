@@ -1,4 +1,3 @@
-; $Id$
 name = Session API
 description = Provides an interface for storing session information.
 core = 7.x
