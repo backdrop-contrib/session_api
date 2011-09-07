@@ -5,3 +5,4 @@ files[] = session_api.module
 files[] = session_api.admin.inc
 files[] = session_api.install
 files[] = session_api.test
+configure = admin/config/development/session-api
