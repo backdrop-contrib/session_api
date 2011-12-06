@@ -15,10 +15,12 @@ function session_api_available() {
 }
 
 /**
- * Initialize sessions for anonymous users.
+ * Create an empty string cookie. This is useful for fooling the
+ * session_api_available() function when using Pressflow, which does not set
+ * a cookie for anonymous users.
  */
 function session_api_start_session() {
-  $_SESSION['session_api'] = TRUE;
+  $_SESSION['session_api_session'] = '';
   drupal_session_start();
 }
 
@@ -45,7 +47,7 @@ function session_api_get_sid($create = TRUE) {
     $sid = FALSE;
 
     // First, check if we already have an active session.
-    if (isset($_COOKIE['session_api_session'])) {
+    if (isset($_COOKIE['session_api_session']) && $_COOKIE['session_api_session']) {
       $session_id = $_COOKIE['session_api_session'];
       $sid = db_query("SELECT sid FROM {session_api} WHERE session_id = :session_id", array(':session_id' => $session_id))->fetchField();
     }
@@ -57,7 +59,7 @@ function session_api_get_sid($create = TRUE) {
     	return -1;
     }
     else {
-       $session_id = md5(ip_address() . time() . drupal_get_private_key());
+      $session_id = md5(ip_address() . time() . drupal_get_private_key());
     }
 
     // For the cookie we use the same domain that Drupal's own session cookie uses.

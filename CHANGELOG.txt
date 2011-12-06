@@ -1,3 +1,7 @@
+6.x-1.5
+=======
+- #1233650 - Added API function `session_api_initialize_cookie()` to give
+  finer-grained control for sites running Pressflow.
 
 DRUPAL-6--1-2, XXXX-XX-XX
 -------------------------
