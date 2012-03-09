@@ -59,7 +59,7 @@ function session_api_get_sid($create = TRUE) {
     	return -1;
     }
     else {
-      $session_id = md5(ip_address() . time() . drupal_get_private_key());
+      $session_id = md5(ip_address() . REQUEST_TIME . drupal_get_private_key());
     }
 
     // For the cookie we use the same domain that Drupal's own session cookie uses.
@@ -68,19 +68,21 @@ function session_api_get_sid($create = TRUE) {
     if ($sid) {
       $rec = new stdClass;
       $rec->sid = $sid;
+      $rec->timestamp = REQUEST_TIME;
       $rec->session_id = $session_id;
       drupal_write_record('session_api', $rec, 'sid');
-      setcookie('session_api_session', $session_id, time() + variable_get('session_api_cookie_expire_time', 2592000), '/', $cookie_domain);
+      setcookie('session_api_session', $session_id, REQUEST_TIME + variable_get('session_api_cookie_expire_time', 2592000), '/', $cookie_domain);
     }
     // No sid exists, create new one.
     else {
       $rec = new stdClass();
+      $rec->timestamp = REQUEST_TIME;
       $rec->session_id = $session_id;
       drupal_write_record('session_api', $rec);
       $sid = $rec->sid;
 
       // Set cookie.
-      setcookie('session_api_session', $session_id, time() + variable_get('session_api_cookie_expire_time', 2592000), '/', $cookie_domain);
+      setcookie('session_api_session', $session_id, REQUEST_TIME + variable_get('session_api_cookie_expire_time', 2592000), '/', $cookie_domain);
     }
   }
   return $sid;
@@ -107,11 +109,12 @@ function session_api_menu() {
  */
 function session_api_cron() {
   // Fetch list of outdated sids.
-  $result = db_query("SELECT sap.sid FROM {session_api} sap LEFT JOIN {sessions} s ON (sap.session_id = s.sid) WHERE s.sid IS NULL");
-  $outdated_sids = array();
-  foreach ($result as $session) {
-    $outdated_sids[] = $session->sid;
-  }
+  $query = db_select('session_api', 'sap');
+  $query->leftJoin('sessions', 's', 'sap.sid = s.sid');
+  $query->fields('sap', array('sid'));
+  $query->condition('sap.timestamp', REQUEST_TIME - variable_get('session_api_cookie_expire_time', 2592000), '<');
+  $outdated_sids = $query->execute()->fetchCol();
+
   if (!empty($outdated_sids)) {
     module_invoke_all('session_api_cleanup', $outdated_sids);
     db_query('DELETE FROM {session_api} WHERE sid IN (:sids)', array(':sids' => $outdated_sids));
