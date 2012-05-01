@@ -14,7 +14,7 @@ function session_api_schema() {
       ),
       'session_id' => array(
         'type' => 'varchar',
-        'length' => 64,
+        'length' => 128,
         'not null' => TRUE,
       ),
       'timestamp' => array(
@@ -55,4 +55,13 @@ function session_api_update_7101() {
   db_add_field('session_api', 'timestamp', array('type' => 'int', 'not null' => TRUE, 'default' => 0));
   db_add_index('session_api', 'timestamp', array('timestamp'));
   return t('Added a timestamp field and index to the session_api table.');
+}
+
+/**
+ * Implements hook_update_N().
+ *
+ * Lengthens the session_id field to match core {sessions}.sid field.
+ */
+function session_api_update_7102() {
+  db_change_field('session_api', 'session_id', 'session_id', array('type' => 'varchar', 'length' => 128, 'not null' => TRUE));
 }

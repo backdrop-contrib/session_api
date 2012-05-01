@@ -69,7 +69,7 @@ class SessionApiTestCase extends DrupalWebTestCase {
 
     // Store ID in the db.
     $rec = new stdClass();
-    $rec->session_id = md5(ip_address() . time() . drupal_get_private_key());
+    $rec->session_id = drupal_hash_base64(uniqid(mt_rand(), TRUE));
     drupal_write_record('session_api', $rec);
     $_COOKIE['session_api_session'] = $rec->session_id;
     $this->assertEqual(session_api_get_sid(), $rec->sid, 'Function session_api_get_sid() correctly retrieves the session_api_id from the database.');
