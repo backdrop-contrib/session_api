@@ -2,11 +2,11 @@
 
 
 /**
- * Implement hook_schema().
+ * Implements hook_schema().
  */
 function session_api_schema() {
   $schema['session_api'] = array(
-    'description' => t('Map Session API IDs to the {sessions} sid field.'),
+    'description' => 'Map Session API IDs to the {sessions} sid field.',
     'fields' => array(
       'sid' => array(
         'type' => 'serial',
@@ -47,7 +47,7 @@ function session_api_update_6100() {
 }
 
 /**
- * Implementation of hook_update_N().
+ * Implements hook_update_N().
  *
  * Adds timestamp field.
  */
