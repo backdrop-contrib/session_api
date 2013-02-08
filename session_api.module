@@ -64,6 +64,13 @@ function session_api_get_sid($create = TRUE) {
 
     // For the cookie we use the same domain that Drupal's own session cookie uses.
     $cookie_domain = ini_get('session.cookie_domain');
+
+    // Set expiration time. If -1, then use an expiration time of 0, which will
+    // cause the cookie to expire when the session ends (i.e, when the browser
+    // closes).
+    $seconds = variable_get('session_api_cookie_expire_time', 2592000);
+    $expire = $seconds === -1 ? REQUEST_TIME + $seconds : 0;
+
     // Update the session timeout.
     if ($sid) {
       $rec = new stdClass;
@@ -71,7 +78,7 @@ function session_api_get_sid($create = TRUE) {
       $rec->timestamp = REQUEST_TIME;
       $rec->session_id = $session_id;
       drupal_write_record('session_api', $rec, 'sid');
-      setcookie('session_api_session', $session_id, REQUEST_TIME + variable_get('session_api_cookie_expire_time', 2592000), '/', $cookie_domain);
+      setcookie('session_api_session', $session_id, $expire, '/', $cookie_domain);
     }
     // No sid exists, create new one.
     else {
@@ -82,7 +89,7 @@ function session_api_get_sid($create = TRUE) {
       $sid = $rec->sid;
 
       // Set cookie.
-      setcookie('session_api_session', $session_id, REQUEST_TIME + variable_get('session_api_cookie_expire_time', 2592000), '/', $cookie_domain);
+      setcookie('session_api_session', $session_id, $expire, '/', $cookie_domain);
     }
   }
   return $sid;
