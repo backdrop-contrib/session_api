@@ -25,11 +25,19 @@ function session_api_start_session() {
 }
 
 /**
- * Return a Session API ID corresponding to the current session.
- * The session id is a created using the same method as Drupal core
- * as defined in includes/session.inc.
- * @param boolean create set this to FALSE if you don't want to create a session
- * cookie if it doesn't already exist.
+ * Returns the current session's Session ID.
+ *
+ * @param bool $create
+ *   (optional) A boolean indicating whether the session needs to be created if
+ *   it doesn't exist yet. Defaults to TRUE.
+ *
+ * @return
+ *   Returns a positive integer with the Session ID when it exists. If not,
+ *   there are 2 possible return values:
+ *   - -1. This indicates that no session exists and none was created.
+ *   - FALSE. This indicates that Session API is unavailable.
+ *
+ * @see: drupal_session_initialize()
  */
 function session_api_get_sid($create = TRUE) {
   static $sid;
