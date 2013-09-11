@@ -57,7 +57,6 @@ function session_api_get_sid($create = TRUE) {
     // First, check if we already have an active session.
     if (isset($_COOKIE['session_api_session']) && $_COOKIE['session_api_session']) {
       $session_id = $_COOKIE['session_api_session'];
-      $sid = db_query("SELECT sid FROM {session_api} WHERE session_id = :session_id", array(':session_id' => $session_id))->fetchField();
     }
     // If the caller doesn't want to create a new session if it didn't exist,
     // then return here.
@@ -80,25 +79,16 @@ function session_api_get_sid($create = TRUE) {
     $expire = $seconds === -1 ? REQUEST_TIME + $seconds : 0;
 
     // Update the session timeout.
-    if ($sid) {
-      $rec = new stdClass;
-      $rec->sid = $sid;
-      $rec->timestamp = REQUEST_TIME;
-      $rec->session_id = $session_id;
-      drupal_write_record('session_api', $rec, 'sid');
-      setcookie('session_api_session', $session_id, $expire, '/', $cookie_domain);
-    }
-    // No sid exists, create new one.
-    else {
-      $rec = new stdClass();
-      $rec->timestamp = REQUEST_TIME;
-      $rec->session_id = $session_id;
-      drupal_write_record('session_api', $rec);
-      $sid = $rec->sid;
+    db_merge('session_api')
+      ->key(array('session_id' => $session_id))
+      ->fields(array('timestamp' => REQUEST_TIME))
+      ->execute();
 
-      // Set cookie.
-      setcookie('session_api_session', $session_id, $expire, '/', $cookie_domain);
-    }
+    // Retrieve the sid.
+    $query = db_select('session_api', 'sap');
+    $query->fields('sap', array('sid'));
+    $query->condition('session_id', $session_id);
+    $sid = $query->execute()->fetchField();
   }
   return $sid;
 }
