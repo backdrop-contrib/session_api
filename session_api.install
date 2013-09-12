@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @file
+ * Install file for Session API.
+ */
 
 /**
  * Implements hook_schema().
