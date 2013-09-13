@@ -68,9 +68,6 @@ function session_api_get_sid($create = TRUE) {
       $session_id = drupal_hash_base64(uniqid(mt_rand(), TRUE));
     }
 
-    // For the cookie we use the same domain that Drupal's own session cookie uses.
-    $cookie_domain = ini_get('session.cookie_domain');
-
     // Set expiration time. If -1, then use an expiration time of 0, which will
     // cause the cookie to expire when the session ends (i.e, when the browser
     // closes).
@@ -88,7 +85,12 @@ function session_api_get_sid($create = TRUE) {
     $query->fields('sap', array('sid'));
     $query->condition('session_id', $session_id);
     $sid = $query->execute()->fetchField();
+
+    // Set cookie using the same domain that Drupal's own session cookie uses.
+    $cookie_domain = ini_get('session.cookie_domain');
+    setcookie('session_api_session', $session_id, $expire, '/', $cookie_domain);
   }
+
   return $sid;
 }
 
