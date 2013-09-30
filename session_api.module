@@ -36,7 +36,7 @@ function session_api_start_session() {
  *   - -1. This indicates that no session exists and none was created.
  *   - FALSE. This indicates that Session API is unavailable.
  *
- * @see: drupal_session_initialize()
+ * @see drupal_session_initialize()
  */
 function session_api_get_sid($create = TRUE) {
   static $sid;
