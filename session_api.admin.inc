@@ -20,5 +20,15 @@ function session_api_settings_form() {
     '#default_value' => variable_get('session_api_cookie_expire_time', 2592000),
   );
 
+  // Cookie name.
+  $description = t('This name will be used for the cookie key used by this module. Certain names for cookies might be incompatible with caching systems such as Varnish.');
+  $description .= ' ' . t('<strong>Warning</strong>: Changing the cookie name will invalidate all current Session API sessions. A new cookie could also conflict with another module\'s cookie name.');
+  $form['session_api_cookie_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Cookie name'),
+    '#default_value' => session_api_get_cookie_name(),
+    '#description' => $description,
+  );
+
   return system_settings_form($form);
 }

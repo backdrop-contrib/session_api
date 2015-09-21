@@ -19,7 +19,7 @@ function session_api_available() {
  * Pressflow, which does not set a cookie for anonymous users.
  */
 function session_api_start_session() {
-  $_SESSION['session_api_session'] = '';
+  $_SESSION[session_api_get_cookie_name()] = '';
   drupal_session_start();
 }
 
@@ -54,8 +54,8 @@ function session_api_get_sid($create = TRUE) {
     $sid = FALSE;
 
     // First, check if we already have an active session.
-    if (isset($_COOKIE['session_api_session']) && $_COOKIE['session_api_session']) {
-      $session_id = $_COOKIE['session_api_session'];
+    if (isset($_COOKIE[session_api_get_cookie_name()]) && $_COOKIE[session_api_get_cookie_name()]) {
+      $session_id = $_COOKIE[session_api_get_cookie_name()];
     }
     // If the caller doesn't want to create a new session if it didn't exist,
     // then return here.
@@ -88,7 +88,7 @@ function session_api_get_sid($create = TRUE) {
 
     // Set cookie using the same domain that Drupal's own session cookie uses.
     $cookie_domain = ini_get('session.cookie_domain');
-    setcookie('session_api_session', $session_id, $expire, '/', $cookie_domain);
+    setcookie(session_api_get_cookie_name(), $session_id, $expire, '/', $cookie_domain);
   }
 
   return $sid;
@@ -126,4 +126,11 @@ function session_api_cron() {
       ->condition('sid', $outdated_sids)
       ->execute();
   }
+}
+
+/**
+ * Get Cookie name to use for this module.
+ */
+function session_api_get_cookie_name() {
+  return variable_get('session_api_cookie_name', 'session_api_session');
 }
