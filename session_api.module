@@ -68,11 +68,9 @@ function session_api_get_sid($create = TRUE) {
       $session_id = drupal_hash_base64(uniqid(mt_rand(), TRUE));
     }
 
-    // Set expiration time. If -1, then use an expiration time of 0, which will
-    // cause the cookie to expire when the session ends (i.e, when the browser
-    // closes).
-    $seconds = variable_get('session_api_cookie_expire_time', 2592000);
-    $expire = $seconds === -1 ? REQUEST_TIME + $seconds : 0;
+    // Set expiration time. If 0, the cookie will expire when the session ends
+    // (i.e, when the browser closes).
+    $expire = REQUEST_TIME + variable_get('session_api_cookie_expire_time', 2592000);
 
     // Update the session timeout.
     db_merge('session_api')
