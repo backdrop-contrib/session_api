@@ -39,7 +39,7 @@ function session_api_start_session() {
  * @see drupal_session_initialize()
  */
 function session_api_get_sid($create = TRUE) {
-  static $sid;
+  $sid = &drupal_static(__FUNCTION__);
 
   if ($create) {
     // Must initialize sessions for anonymous users.
