@@ -25,6 +25,17 @@ function session_api_settings_form() {
     '#default_value' => variable_get('session_api_cookie_expire_time', 2592000),
   );
 
+  // Cookie purging.
+  $form['session_api_cookie_purge_time'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Cookie purge time'),
+    '#description' => t(
+      "Cookies will be purged on cron run when they have become unused for the amount of time set here. This is" .
+      "separate from the cookie expire time, so sessions won't be purged before the corresponding cookie expires."
+    ),
+    '#default_value' => variable_get('session_api_cookie_purge_time', 2592000),
+  );
+
   // Cookie name.
   $description = t('This name will be used for the cookie key used by this module. Certain names for cookies might be incompatible with caching systems such as Varnish.');
   $description .= ' ' . t('<strong>Warning</strong>: Changing the cookie name will invalidate all current Session API sessions. A new cookie could also conflict with another module\'s cookie name.');

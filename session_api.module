@@ -115,7 +115,7 @@ function session_api_cron() {
   // Fetch list of outdated sids.
   $query = db_select('session_api', 'sap');
   $query->fields('sap', array('sid'));
-  $query->condition('sap.timestamp', REQUEST_TIME - variable_get('session_api_cookie_expire_time', 2592000), '<');
+  $query->condition('sap.timestamp', REQUEST_TIME - variable_get('session_api_cookie_purge_time', 2592000), '<');
   $outdated_sids = $query->execute()->fetchCol();
 
   if (!empty($outdated_sids)) {
