@@ -70,7 +70,8 @@ function session_api_get_sid($create = TRUE) {
 
     // Set expiration time. If 0, the cookie will expire when the session ends
     // (i.e, when the browser closes).
-    $expire = REQUEST_TIME + variable_get('session_api_cookie_expire_time', 2592000);
+    $expire = variable_get('session_api_cookie_expire_time', 2592000);
+    $expire_timestamp = ($expire == 0) ? 0 : REQUEST_TIME + $expire;
 
     // Update the session timeout.
     db_merge('session_api')
@@ -86,7 +87,7 @@ function session_api_get_sid($create = TRUE) {
 
     // Set cookie using the same domain that Drupal's own session cookie uses.
     $cookie_domain = ini_get('session.cookie_domain');
-    setcookie(session_api_get_cookie_name(), $session_id, $expire, '/', $cookie_domain);
+    setcookie(session_api_get_cookie_name(), $session_id, $expire_timestamp, '/', $cookie_domain);
   }
 
   return $sid;
