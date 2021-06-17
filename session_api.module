@@ -81,7 +81,7 @@ function session_api_get_sid($create = TRUE) {
 
     // Set expiration time. If 0, the cookie will expire when the session ends
     // (i.e, when the browser closes).
-    $expire = config_get('session_api.settings', 'session_api_cookie_expire_time');
+    $expire = config_get('session_api.settings', 'cookie_expire_time');
     $expire_timestamp = ($expire == 0) ? 0 : REQUEST_TIME + $expire;
 
     // Update the session timeout.
@@ -127,7 +127,7 @@ function session_api_cron() {
   // Fetch list of outdated sids.
   $query = db_select('session_api', 'sap');
   $query->fields('sap', array('sid'));
-  $query->condition('sap.timestamp', REQUEST_TIME - config_get('session_api.settings', 'session_api_cookie_purge_time'), '<');
+  $query->condition('sap.timestamp', REQUEST_TIME - config_get('session_api.settings', 'cookie_purge_time'), '<');
   $outdated_sids = $query->execute()->fetchCol();
 
   if (!empty($outdated_sids)) {
@@ -142,13 +142,5 @@ function session_api_cron() {
  * Get Cookie name to use for this module.
  */
 function session_api_get_cookie_name() {
-  return config_get('session_api.settings', 'session_api_cookie_name');
-}
-
-/**
- * Implements hook_autoload_info().
- */
-function session_api_autoload_info() {
-  return array(
-  );
+  return config_get('session_api.settings', 'cookie_name');
 }

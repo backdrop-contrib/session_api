@@ -15,7 +15,7 @@ function session_api_settings_form() {
 
   // Cookie expiry.
   $form['#config'] = 'session_api.settings';
-  $form['session_api_cookie_expire_time'] = array(
+  $form['cookie_expire_time'] = array(
     '#type' => 'textfield',
     '#title' => t('Cookie expire time'),
     '#description' => t(
@@ -24,24 +24,24 @@ function session_api_settings_form() {
       "stay valid in a user's browser. If set to 0, then the cookie will expire when the session ends (i.e, when the " .
       "browser closes)"
     ),
-    '#default_value' => $config->get('session_api_cookie_expire_time'),
+    '#default_value' => $config->get('cookie_expire_time'),
   );
 
   // Cookie purging.
-  $form['session_api_cookie_purge_time'] = array(
+  $form['cookie_purge_time'] = array(
     '#type' => 'textfield',
     '#title' => t('Cookie purge time'),
     '#description' => t(
       "Cookies will be purged on cron run when they have become unused for the amount of time set here. This is" .
       "separate from the cookie expire time, so sessions won't be purged before the corresponding cookie expires."
     ),
-    '#default_value' => $config->get('session_api_cookie_purge_time'),
+    '#default_value' => $config->get('cookie_purge_time'),
   );
 
   // Cookie name.
   $description = t('This name will be used for the cookie key used by this module. Certain names for cookies might be incompatible with caching systems such as Varnish.');
   $description .= ' ' . t('<strong>Warning</strong>: Changing the cookie name will invalidate all current Session API sessions. A new cookie could also conflict with another module\'s cookie name.');
-  $form['session_api_cookie_name'] = array(
+  $form['cookie_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Cookie name'),
     '#default_value' => session_api_get_cookie_name(),

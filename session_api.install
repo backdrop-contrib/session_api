@@ -39,18 +39,6 @@ function session_api_schema() {
   return $schema;
 }
 
-// TODO The old hook_update_N functions cannot be applied to Backdrop.
-function session_api_update_6100() { }
-
-// TODO The old hook_update_N functions cannot be applied to Backdrop.
-function session_api_update_7101() { }
-
-// TODO The old hook_update_N functions cannot be applied to Backdrop.
-function session_api_update_7102() { }
-
-// TODO The old hook_update_N functions cannot be applied to Backdrop.
-function session_api_update_7103() { }
-
 /**
  * Implements hook_update_last_removed().
  */
@@ -63,19 +51,12 @@ function session_api_update_last_removed() {
  */
 function session_api_update_1000() {
   $config = config('session_api.settings');
-  $config->set('session_api_cookie_expire_time', update_variable_get('session_api_cookie_expire_time', '2592000'));
-  $config->set('session_api_cookie_purge_time', update_variable_get('session_api_cookie_purge_time', '2592000'));
-  $config->set('session_api_cookie_name', update_variable_get('session_api_cookie_name', 'session_api_session'));
+  $config->set('cookie_expire_time', update_variable_get('session_api_cookie_expire_time', '2592000'));
+  $config->set('cookie_purge_time', update_variable_get('session_api_cookie_purge_time', '2592000'));
+  $config->set('cookie_name', update_variable_get('session_api_cookie_name', 'session_api_session'));
   $config->save();
 
   update_variable_del('session_api_cookie_expire_time');
   update_variable_del('session_api_cookie_purge_time');
   update_variable_del('session_api_cookie_name');
-}
-
-/**
- * Implements hook_install().
- */
-function session_api_install() {
-  // Dynamically generated variable data was detected.
 }
