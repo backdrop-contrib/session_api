@@ -9,10 +9,12 @@
  * Session API admin settings form.
  */
 function session_api_settings_form() {
+  $config = config('session_api.settings');
   // Find modules that implement hook_session_api_cleanup().
   $modules = module_implements('session_api_cleanup');
 
   // Cookie expiry.
+  $form['#config'] = 'session_api.settings';
   $form['session_api_cookie_expire_time'] = array(
     '#type' => 'textfield',
     '#title' => t('Cookie expire time'),
@@ -22,7 +24,7 @@ function session_api_settings_form() {
       "stay valid in a user's browser. If set to 0, then the cookie will expire when the session ends (i.e, when the " .
       "browser closes)"
     ),
-    '#default_value' => variable_get('session_api_cookie_expire_time', 2592000),
+    '#default_value' => $config->get('session_api_cookie_expire_time'),
   );
 
   // Cookie purging.
@@ -33,7 +35,7 @@ function session_api_settings_form() {
       "Cookies will be purged on cron run when they have become unused for the amount of time set here. This is" .
       "separate from the cookie expire time, so sessions won't be purged before the corresponding cookie expires."
     ),
-    '#default_value' => variable_get('session_api_cookie_purge_time', 2592000),
+    '#default_value' => $config->get('session_api_cookie_purge_time'),
   );
 
   // Cookie name.

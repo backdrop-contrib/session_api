@@ -1,0 +1,6 @@
+[SessionApiTestCase]
+name = Session API tests
+description = Tests various Session API functions
+group = Session API
+file = session_api.test
+

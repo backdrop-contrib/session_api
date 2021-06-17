@@ -7,7 +7,7 @@
  */
 
 /**
- * Implementation of hook_menu().
+ * Implements hook_menu().
  */
 function session_api_test_menu() {
   $items['session-api-test'] = array(
@@ -21,7 +21,7 @@ function session_api_test_menu() {
 }
 
 /**
- * Implementation of hook_init().
+ * Implements hook_init().
  */
 function session_api_test_init() {
   $sid = session_api_get_sid();

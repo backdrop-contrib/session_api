@@ -20,7 +20,18 @@ function session_api_available() {
  */
 function session_api_start_session() {
   $_SESSION[session_api_get_cookie_name()] = '';
-  drupal_session_start();
+  backdrop_session_start();
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function session_api_config_info() {
+  $prefixes['session_api.settings'] = array(
+    'label' => t('Session API settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
 }
 
 /**
@@ -36,10 +47,10 @@ function session_api_start_session() {
  *   - -1. This indicates that no session exists and none was created.
  *   - FALSE. This indicates that Session API is unavailable.
  *
- * @see drupal_session_initialize()
+ * @see backdrop_session_initialize()
  */
 function session_api_get_sid($create = TRUE) {
-  $sid = &drupal_static(__FUNCTION__);
+  $sid = &backdrop_static(__FUNCTION__);
 
   if ($create) {
     // Must initialize sessions for anonymous users.
@@ -65,12 +76,12 @@ function session_api_get_sid($create = TRUE) {
       return -1;
     }
     else {
-      $session_id = drupal_hash_base64(uniqid(mt_rand(), TRUE));
+      $session_id = backdrop_hash_base64(uniqid(mt_rand(), TRUE));
     }
 
     // Set expiration time. If 0, the cookie will expire when the session ends
     // (i.e, when the browser closes).
-    $expire = variable_get('session_api_cookie_expire_time', 2592000);
+    $expire = config_get('session_api.settings', 'session_api_cookie_expire_time');
     $expire_timestamp = ($expire == 0) ? 0 : REQUEST_TIME + $expire;
 
     // Update the session timeout.
@@ -85,7 +96,7 @@ function session_api_get_sid($create = TRUE) {
     $query->condition('session_id', $session_id);
     $sid = $query->execute()->fetchField();
 
-    // Set cookie using the same domain that Drupal's own session cookie uses.
+    // Set cookie using the same domain that Backdrop's own session cookie uses.
     $cookie_domain = ini_get('session.cookie_domain');
     setcookie(session_api_get_cookie_name(), $session_id, $expire_timestamp, '/', $cookie_domain);
   }
@@ -101,7 +112,7 @@ function session_api_menu() {
     'title' => 'Session API Configuration',
     'description' => 'Configure Session API behavior.',
     'access arguments' => array('administer site configuration'),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('session_api_settings_form'),
     'file' => 'session_api.admin.inc',
   );
@@ -116,7 +127,7 @@ function session_api_cron() {
   // Fetch list of outdated sids.
   $query = db_select('session_api', 'sap');
   $query->fields('sap', array('sid'));
-  $query->condition('sap.timestamp', REQUEST_TIME - variable_get('session_api_cookie_purge_time', 2592000), '<');
+  $query->condition('sap.timestamp', REQUEST_TIME - config_get('session_api.settings', 'session_api_cookie_purge_time'), '<');
   $outdated_sids = $query->execute()->fetchCol();
 
   if (!empty($outdated_sids)) {
@@ -131,5 +142,13 @@ function session_api_cron() {
  * Get Cookie name to use for this module.
  */
 function session_api_get_cookie_name() {
-  return variable_get('session_api_cookie_name', 'session_api_session');
+  return config_get('session_api.settings', 'session_api_cookie_name');
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function session_api_autoload_info() {
+  return array(
+  );
 }

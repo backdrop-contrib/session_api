@@ -1,5 +1,5 @@
 name = Session API
 description = Provides an interface for storing session information.
-core = 7.x
-files[] = session_api.test
+backdrop = 1.x
+type = module
 configure = admin/config/development/session-api

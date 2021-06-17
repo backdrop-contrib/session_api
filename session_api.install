@@ -39,44 +39,43 @@ function session_api_schema() {
   return $schema;
 }
 
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function session_api_update_6100() { }
+
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function session_api_update_7101() { }
+
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function session_api_update_7102() { }
+
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function session_api_update_7103() { }
+
 /**
- * Remove cleanup variables.
+ * Implements hook_update_last_removed().
  */
-function session_api_update_6100() {
-  $ret = array();
-
-  $ret[] = update_sql("DELETE FROM {variable} WHERE name LIKE 'session_api_run_cron_%'");
-
-  return $ret;
+function session_api_update_last_removed() {
+  return 7103;
 }
 
 /**
- * Implements hook_update_N().
- *
- * Adds timestamp field.
+ * Migrate session_api variables to config.
  */
-function session_api_update_7101() {
-  db_add_field('session_api', 'timestamp', array('type' => 'int', 'not null' => TRUE, 'default' => 0));
-  db_add_index('session_api', 'timestamp', array('timestamp'));
-  return t('Added a timestamp field and index to the session_api table.');
+function session_api_update_1000() {
+  $config = config('session_api.settings');
+  $config->set('session_api_cookie_expire_time', update_variable_get('session_api_cookie_expire_time', '2592000'));
+  $config->set('session_api_cookie_purge_time', update_variable_get('session_api_cookie_purge_time', '2592000'));
+  $config->set('session_api_cookie_name', update_variable_get('session_api_cookie_name', 'session_api_session'));
+  $config->save();
+
+  update_variable_del('session_api_cookie_expire_time');
+  update_variable_del('session_api_cookie_purge_time');
+  update_variable_del('session_api_cookie_name');
 }
 
 /**
- * Implements hook_update_N().
- *
- * Lengthens the session_id field to match core {sessions}.sid field.
+ * Implements hook_install().
  */
-function session_api_update_7102() {
-  db_change_field('session_api', 'session_id', 'session_id', array('type' => 'varchar', 'length' => 128, 'not null' => TRUE));
-}
-
-/**
- * Implements hook_update_N().
- *
- * Sets the expire time to 0 if it was previously set to -1.
- */
-function session_api_update_7103() {
-  if (variable_get('session_api_cookie_expire_time', 2592000) == -1) {
-    variable_set('session_api_cookie_expire_time', 0);
-  }
+function session_api_install() {
+  // Dynamically generated variable data was detected.
 }

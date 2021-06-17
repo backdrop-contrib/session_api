@@ -1,0 +1,6 @@
+{
+    "_config_name": "session_api.settings",
+    "session_api_cookie_expire_time": "2592000",
+    "session_api_cookie_purge_time": "2592000",
+    "session_api_cookie_name": "session_api_session"
+}
