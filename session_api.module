@@ -9,7 +9,13 @@
  * Determine if Session API is available by checking if cookies are enabled.
  */
 function session_api_available() {
-  return !empty($_COOKIE);
+  $bypass_cookie_check = config_get('session_api.settings', 'bypass_cookie_check');
+  if (!$bypass_cookie_check) {
+    return !empty($_COOKIE);
+  }
+  else {
+    return TRUE;
+  }
 }
 
 /**

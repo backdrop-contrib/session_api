@@ -1,5 +1,6 @@
 {
     "_config_name": "session_api.settings",
+    "bypass_cookie_check": false,
     "cookie_expire_time": "2592000",
     "cookie_purge_time": "2592000",
     "cookie_name": "session_api_session"
